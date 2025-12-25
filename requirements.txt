@@ -1,0 +1,14 @@
+# UPSC AI News Syncer - Python Dependencies
+
+# Core dependencies
+psycopg2-binary>=2.9.9
+requests>=2.31.0
+numpy>=1.24.0
+
+# Optional: For better HTML parsing (if needed later)
+# beautifulsoup4>=4.12.0
+# lxml>=4.9.0
+
+# Optional: For async operations (if needed later)
+# aiohttp>=3.9.0
+
