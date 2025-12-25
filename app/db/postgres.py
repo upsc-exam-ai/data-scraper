@@ -47,20 +47,21 @@ class PostgresDB:
     def init_schema(self):
         """Initialize database schema."""
         schema_sql = """
-        CREATE TABLE IF NOT EXISTS news_articles (
-            id UUID PRIMARY KEY,
-            source TEXT NOT NULL,
-            title TEXT NOT NULL,
+        CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        
+        CREATE TABLE IF NOT EXISTS ca_articles (
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             published_date DATE NOT NULL,
-            url TEXT UNIQUE,
-            raw_text TEXT,
-            cleaned_text TEXT,
+            source_url TEXT NOT NULL UNIQUE,
+            article JSONB NOT NULL,
+            attachments JSONB,
             created_at TIMESTAMP DEFAULT now()
         );
         
-        CREATE INDEX IF NOT EXISTS idx_news_articles_source ON news_articles(source);
-        CREATE INDEX IF NOT EXISTS idx_news_articles_published_date ON news_articles(published_date);
-        CREATE INDEX IF NOT EXISTS idx_news_articles_url ON news_articles(url);
+        CREATE INDEX IF NOT EXISTS idx_ca_articles_published_date ON ca_articles(published_date);
+        CREATE INDEX IF NOT EXISTS idx_ca_articles_source_url ON ca_articles(source_url);
+        CREATE INDEX IF NOT EXISTS idx_ca_articles_source ON ca_articles USING GIN ((article->'source'));
+        CREATE INDEX IF NOT EXISTS idx_ca_articles_title ON ca_articles USING GIN (to_tsvector('english', article->>'title'));
         """
         
         try:
@@ -73,55 +74,92 @@ class PostgresDB:
             self.conn.rollback()
             raise
     
-    def article_exists(self, url: str) -> bool:
-        """Check if article with given URL already exists."""
-        query = "SELECT EXISTS(SELECT 1 FROM news_articles WHERE url = %s)"
+    def article_exists(self, source_url: str) -> bool:
+        """Check if article with given source URL already exists."""
+        query = "SELECT EXISTS(SELECT 1 FROM ca_articles WHERE source_url = %s)"
         try:
             with self.conn.cursor() as cursor:
-                cursor.execute(query, (url,))
+                cursor.execute(query, (source_url,))
                 return cursor.fetchone()[0]
         except Exception as e:
             logger.error(f"Failed to check article existence: {e}")
             return False
     
-    def insert_article(self, article_dict: Dict) -> bool:
+    def insert_article(self, published_date: str, source_url: str, article_json: Dict, attachments_json: Optional[Dict] = None) -> bool:
         """
         Insert article into database.
-        Returns True if inserted, False if duplicate.
+        
+        Args:
+            published_date: Date string in YYYY-MM-DD format
+            source_url: Original article URL
+            article_json: Article content in standardized JSON format
+            attachments_json: Optional attachments (images, PDFs, etc.)
+            
+        Returns:
+            True if inserted, False if duplicate
         """
         # Check for duplicate first
-        if self.article_exists(article_dict["url"]):
-            logger.info(f"Article already exists: {article_dict['url']}")
+        if self.article_exists(source_url):
+            logger.info(f"Article already exists: {source_url}")
             return False
         
         query = """
-        INSERT INTO news_articles (id, source, title, published_date, url, raw_text, cleaned_text, created_at)
-        VALUES (%(id)s, %(source)s, %(title)s, %(published_date)s, %(url)s, %(raw_text)s, %(cleaned_text)s, %(created_at)s)
-        ON CONFLICT (url) DO NOTHING
+        INSERT INTO ca_articles (published_date, source_url, article, attachments)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (source_url) DO NOTHING
+        RETURNING id
         """
         
         try:
+            import json
             with self.conn.cursor() as cursor:
-                cursor.execute(query, article_dict)
+                cursor.execute(query, (
+                    published_date,
+                    source_url,
+                    json.dumps(article_json),
+                    json.dumps(attachments_json) if attachments_json else None
+                ))
                 self.conn.commit()
-                logger.info(f"Inserted article: {article_dict['title']}")
-                return True
+                result = cursor.fetchone()
+                if result:
+                    logger.info(f"Inserted article: {article_json.get('title', 'Unknown')}")
+                    return True
+                return False
         except Exception as e:
             logger.error(f"Failed to insert article: {e}")
             self.conn.rollback()
             return False
     
-    def get_articles(self, limit: int = 10) -> List[Dict]:
-        """Retrieve recent articles."""
-        query = """
-        SELECT * FROM news_articles 
-        ORDER BY published_date DESC 
-        LIMIT %s
+    def get_articles(self, limit: int = 10, source: Optional[str] = None) -> List[Dict]:
         """
+        Retrieve recent articles.
+        
+        Args:
+            limit: Maximum number of articles to retrieve
+            source: Optional filter by source name
+            
+        Returns:
+            List of article dictionaries
+        """
+        if source:
+            query = """
+            SELECT * FROM ca_articles 
+            WHERE article->>'source' = %s
+            ORDER BY published_date DESC 
+            LIMIT %s
+            """
+            params = (source, limit)
+        else:
+            query = """
+            SELECT * FROM ca_articles 
+            ORDER BY published_date DESC 
+            LIMIT %s
+            """
+            params = (limit,)
         
         try:
             with self.conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                cursor.execute(query, (limit,))
+                cursor.execute(query, params)
                 return cursor.fetchall()
         except Exception as e:
             logger.error(f"Failed to retrieve articles: {e}")

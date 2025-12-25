@@ -1,9 +1,12 @@
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+env/
+venv/
+ENV/
 build/
 develop-eggs/
 dist/
@@ -20,13 +23,20 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
-venv/
-env/
-ENV/
-.venv/
+# Logs
+logs/*.log
+logs/
+*.log
 
-# IDEs
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+.dockerignore
+
+# IDE
 .vscode/
 .idea/
 *.swp
@@ -37,13 +47,15 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-
-# Docker
-.dockerignore
-
 # Environment
 .env
 .env.local
 
+# Test outputs
+test/raw_response.html
+test/detailed_extraction.json
+test/analysis_results.json
+
+# Temporary files
+*.tmp
+*.bak

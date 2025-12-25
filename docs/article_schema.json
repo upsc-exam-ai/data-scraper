@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Current Affairs Article Schema",
+  "description": "Standardized schema for current affairs articles from various sources",
+  "type": "object",
+  "required": ["title", "source", "content"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Article title/headline"
+    },
+    "source": {
+      "type": "string",
+      "description": "Source name (e.g., 'Sanskriti IAS', 'Drishti IAS')"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Exam-specific metadata tags",
+      "properties": {
+        "prelims": {
+          "type": "string",
+          "description": "Prelims exam relevance tags"
+        },
+        "mains": {
+          "type": "string",
+          "description": "Mains exam relevance tags (GS papers and topics)"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional topic tags"
+        }
+      }
+    },
+    "content": {
+      "type": "array",
+      "description": "Array of content sections with simple heading-subheading-content structure",
+      "items": {
+        "type": "object",
+        "required": ["heading", "content"],
+        "properties": {
+          "heading": {
+            "type": "string",
+            "description": "Main section heading (H2 level)"
+          },
+          "subheading": {
+            "type": ["string", "null"],
+            "description": "Optional subsection heading (H3 level)"
+          },
+          "content": {
+            "type": "string",
+            "description": "Text content for this section/subsection"
+          }
+        }
+      }
+    },
+    "faqs": {
+      "type": "array",
+      "description": "Frequently Asked Questions",
+      "items": {
+        "type": "object",
+        "required": ["question", "answer"],
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "images": {
+      "type": "array",
+      "description": "Images associated with the article",
+      "items": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Image URL"
+          },
+          "alt": {
+            "type": "string",
+            "description": "Alt text"
+          },
+          "caption": {
+            "type": "string",
+            "description": "Image caption or title"
+          }
+        }
+      }
+    },
+    "extracted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when article was extracted"
+    }
+  }
+}
+
