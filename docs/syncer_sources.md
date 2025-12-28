@@ -2,9 +2,9 @@
 2. https://www.drishtiias.com/current-affairs-news-analysis-editorials/news-analysis/20-12-2025
 3. https://visionias.in/current-affairs/news-today/2025-12-20/environment/corporate-social-responsibility-csr-must-include-environmental-responsibility-supreme-court-sc
 4. https://vajiramandravi.com/current-affairs/upsc-prelims-current-affairs/2025/12/21/
-https://vajiramandravi.com/current-affairs/upsc-daily-quiz-20-december-2025/
-5. https://www.nextias.com/ca/headlines-of-the-day/20-12-2025/headlines-of-the-day-20-december-2025
-6. https://www.nextias.com/ca/current-affairs/20-12-2025
-7. https://www.sanskritiias.com/current-affairs/date/20-December-2025
-8. https://www.understandupsc.com/29-nov-2025/
-9. https://www.pmfias.com/current-affairs-december-20-2025/
+5. https://vajiramandravi.com/current-affairs/upsc-daily-quiz-20-december-2025/
+6. https://www.nextias.com/ca/headlines-of-the-day/20-12-2025/headlines-of-the-day-20-december-2025
+7. https://www.nextias.com/ca/current-affairs/20-12-2025
+8. https://www.sanskritiias.com/current-affairs/date/20-December-2025
+9. https://www.understandupsc.com/29-nov-2025/
+10. https://www.pmfias.com/current-affairs-december-20-2025/
